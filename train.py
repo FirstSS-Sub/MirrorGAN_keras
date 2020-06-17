@@ -38,7 +38,7 @@ def main():
     max_epoch = input()
     
     #DataGenerator
-    imsize = cfg.TREE.BASE_SIZE * (2**(cfg.TREE.BRANCH_NUM - 1))  #64, 3
+    imsize = cfg.TREE.BASE_SIZE * (2**(branch_num - 1))  #64, 3
     image_transform = transforms.Compose([
         transforms.Resize(int(imsize * 76 / 64)),
         transforms.RandomCrop(imsize),
@@ -176,10 +176,10 @@ def main():
 
         #Save image
         if epoch % 1 == 0:
-            sample_images(epoch, test_noise, test_eps, test_cap_pd, test_mask, G_model)
+            sample_images(branch_num, epoch, test_noise, test_eps, test_cap_pd, test_mask, G_model)
 
 
-def sample_images(epoch, noise, eps, cap_pd, mask, G_model):
+def sample_images(branch_num, epoch, noise, eps, cap_pd, mask, G_model):
     r, c = 5, 4
     if branch_num == 1:
         gen_imgs = G_model.predict([cap_pd, eps, noise])
