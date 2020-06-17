@@ -31,7 +31,8 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 
-def main():print("BRANCH_NUM ?: ", end="")
+def main():
+    print("BRANCH_NUM ?: ", end="")
     branch_num = input()
     print("MAX_EPOCH ?: ", end="")
     max_epoch = input()
@@ -180,7 +181,7 @@ def main():print("BRANCH_NUM ?: ", end="")
 
 def sample_images(epoch, noise, eps, cap_pd, mask, G_model):
     r, c = 5, 4
-    if branch_num. == 1:
+    if branch_num == 1:
         gen_imgs = G_model.predict([cap_pd, eps, noise])
     else:
         gen_imgs = G_model.predict([cap_pd, eps, noise, mask])
