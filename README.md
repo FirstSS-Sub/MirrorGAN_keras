@@ -20,5 +20,5 @@ python3 main.py
 pretrainかtrainを選択し、EPOCH数とMAX_BRANCH数を選択したら学習が始まります。  
 学習のさせ方は https://github.com/komiya-m/MirrorGAN を参照。
   
-コンテナから抜けるときは`Ctrl+p``Ctrl+q`で抜けられます。  
+コンテナから抜けるときは`Ctrl+p`、`Ctrl+q`で抜けられます。  
 抜けたあとも`docker logs mirrorgan -f`でログを見ることができます。
