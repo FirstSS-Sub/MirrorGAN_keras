@@ -3,7 +3,7 @@
 ## 導入
 - Dockerの導入をまだ行っていない場合はhttps://github.com/FirstSS-Sub/Docker-Mnistの手順で導入する
 - このリポジトリをclone
-- 研究室の `share/members/sito/MirrorGAN_keras` にある、`data`フォルダをclone してきたこのリポジトリの直下に配置
+- 研究室の `share/members/sito/MirrorGAN_keras` にある、`data`フォルダをcloneしてきたこのリポジトリの直下に配置
 
 ## 実行
 ```
