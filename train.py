@@ -33,9 +33,9 @@ from tqdm import tqdm
 
 def main():
     print("BRANCH_NUM ?: ", end="")
-    branch_num = input()
+    branch_num = int(input())
     print("MAX_EPOCH ?: ", end="")
-    max_epoch = input()
+    max_epoch = int(input())
     
     #DataGenerator
     imsize = cfg.TREE.BASE_SIZE * (2**(branch_num - 1))  #64, 3
