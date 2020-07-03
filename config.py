@@ -22,7 +22,7 @@ __C.TREE.BASE_SIZE = 64
 
 # Training options
 __C.TRAIN = edict()
-__C.TRAIN.BATCH_SIZE = 20
+__C.TRAIN.BATCH_SIZE = 2
 __C.TRAIN.MAX_EPOCH = 20
 __C.TRAIN.FLAG = True
 #load model path（weight onry）

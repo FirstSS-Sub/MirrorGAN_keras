@@ -1,18 +1,18 @@
 from tensorflow.keras import backend as K
-from tensorflow.python.keras.engine import Layer
+# from tensorflow.python.keras.engine import Layer
 import numpy as np
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.models import Model
-from tensorflow.keras.layers import Dense, Activation, Input, Concatenate, Lambda
-from tensorflow.keras.layers import LSTM, GRU, CuDNNLSTM, CuDNNGRU, Dropout
-from tensorflow.keras.layers import Reshape, LeakyReLU, ZeroPadding2D
-from tensorflow.keras.layers import Conv1D, Add, Conv2D, UpSampling2D
+# from tensorflow.keras.layers import Dense, Activation, Input, Concatenate, Lambda
+# from tensorflow.keras.layers import LSTM, GRU, CuDNNLSTM, CuDNNGRU, Dropout
+# from tensorflow.keras.layers import Reshape, LeakyReLU, ZeroPadding2D
+# from tensorflow.keras.layers import Conv1D, Add, Conv2D, UpSampling2D
 # from keras.layers.wrappers import Bidirectional
-from tensorflow.keras.layers import Bidirectional
+# from tensorflow.keras.layers import Bidirectional
 # from keras.layers.normalization import BatchNormalization
-from tensorflow.keras.layers import BatchNormalization
+# from tensorflow.keras.layers import BatchNormalization
 # from keras.layers.embeddings import Embedding
-from tensorflow.keras.layers import Embedding
+# from tensorflow.keras.layers import Embedding
 from tensorflow.keras.applications.inception_v3 import InceptionV3
 from tensorflow.keras.applications.xception import Xception
 import tensorflow.keras
@@ -31,12 +31,7 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 
-def main():
-    print("BRANCH_NUM ?: ", end="")
-    branch_num = int(input())
-    print("MAX_EPOCH ?: ", end="")
-    max_epoch = int(input())
-    
+def main(branch_num, max_epoch):
     #DataGenerator
     imsize = cfg.TREE.BASE_SIZE * (2**(branch_num - 1))  #64, 3
     image_transform = transforms.Compose([
@@ -49,13 +44,14 @@ def main():
         cfg.DATA_DIR,
         "train",
         base_size=cfg.TREE.BASE_SIZE,
-        transform=image_transform)
+        transform=image_transform,
+        branch_num=branch_num)
     assert dataset
 
-    traingenerator = DataGenerator(dataset, batchsize=cfg.TRAIN.BATCH_SIZE)
+    traingenerator = DataGenerator(dataset, batchsize=cfg.TRAIN.BATCH_SIZE, branch_num=branch_num)
 
     ##Create model
-    G_model, D_model, GRD_model, CR_model, RNN_model = model_create(dataset)
+    G_model, D_model, GRD_model, CR_model, RNN_model = model_create(dataset, branch_num)
     print("loadmodel_completed")
 
     #Preparation for learning

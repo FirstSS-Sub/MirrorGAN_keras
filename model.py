@@ -280,21 +280,21 @@ def NEXT_STAGE_G(h_code, word_emb, c_code, mask_input, ngf):
     return out_code, attm, atts
 
 
-def G_DCGAN(sent_emb, word_emb, c_code):
+def G_DCGAN(sent_emb, word_emb, c_code, branch_num):
     ngf = cfg.GAN.GF_DIM  #128
     c_dim = cfg.GAN.CONDITION_DIM
     attm, atts = None, None
 
     mask_input = Input(shape=(cfg.TEXT.WORDS_NUM, ), name='mask_input')
     netGsout_code = []
-    if cfg.TREE.BRANCH_NUM > 0:
+    if branch_num > 0:
         out_code, z_code_input = INIT_STAGE_G(c_code, ngf * 16)
         netGsout_code += [out_code]
-    if cfg.TREE.BRANCH_NUM > 1:
+    if branch_num > 1:
         out_code, attm, atts = NEXT_STAGE_G(out_code, word_emb, c_code,
                                             mask_input, ngf)
         netGsout_code += [out_code]
-    if cfg.TREE.BRANCH_NUM > 2:
+    if branch_num > 2:
         out_code, attm, atts = NEXT_STAGE_G(out_code, word_emb, c_code,
                                             mask_input, ngf)
         netGsout_code += [out_code]

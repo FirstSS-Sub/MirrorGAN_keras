@@ -5,10 +5,11 @@ from dataset import TextDataset
 
 
 class DataGenerator(object):
-    def __init__(self, dataset, batchsize, eos=False):
+    def __init__(self, dataset, batchsize, branch_num, eos=False):
         self.dataset = dataset
         self.imsize = dataset.imsize
         self.batchsize = batchsize
+        self.branch_num = branch_num
         self.n_words = dataset.n_words
         self.count = 0
         self.length = len(dataset)
@@ -20,9 +21,9 @@ class DataGenerator(object):
 
     def __next__(self):
         img64_ar = np.empty((0, self.imsize[0], self.imsize[0], 3))
-        if cfg.TREE.BRANCH_NUM > 1:
+        if self.branch_num > 1:
             img128_ar = np.empty((0, self.imsize[1], self.imsize[1], 3))
-        if cfg.TREE.BRANCH_NUM > 2:
+        if self.branch_num > 2:
             img256_ar = np.empty((0, self.imsize[2], self.imsize[2], 3))
 
         captions_ar = np.empty((0, cfg.TEXT.WORDS_NUM, 1))
@@ -39,9 +40,9 @@ class DataGenerator(object):
                 self.count = 0
 
             img64_ar = np.vstack((img64_ar, imgs[0][np.newaxis, :]))
-            if cfg.TREE.BRANCH_NUM > 1:
+            if self.branch_num > 1:
                 img128_ar = np.vstack((img128_ar, imgs[1][np.newaxis, :]))
-            if cfg.TREE.BRANCH_NUM > 2:
+            if self.branch_num > 2:
                 img256_ar = np.vstack((img256_ar, imgs[2][np.newaxis, :]))
             captions_ar = np.vstack((captions_ar, captions[np.newaxis, :]))
             zero_count = int(sum(captions == 0))
@@ -76,11 +77,11 @@ class DataGenerator(object):
                 ind = y_captions_ar[j, i, 0].astype("int")
                 captions_label[j, i, ind] = 1
         image_list = []
-        if cfg.TREE.BRANCH_NUM > 0:
+        if self.branch_num > 0:
             image_list += [img64_ar]
-        if cfg.TREE.BRANCH_NUM > 1:
+        if self.branch_num > 1:
             image_list += [img128_ar]
-        if cfg.TREE.BRANCH_NUM > 2:
+        if self.branch_num > 2:
             image_list += [img256_ar]
 
         return image_list, captions_ar, captions_ar_prezeropad, \
@@ -99,11 +100,21 @@ class DataGenerator_encode(object):
         self.maxcount = int(self.length / self.batchsize)
 
     def __iter__(self):
-        self.count = 0
+        # self.count = 0
         return self
 
     def __next__(self):
-        img256_ar = np.empty((0, self.imsize[2], self.imsize[2], 3))
+        # print("0:", self.imsize[0])
+        # print("1:", self.imsize[1])
+        # print("2:", self.imsize[2])
+        if self.dataset:
+            print("--------------------")
+            print(self.count)
+            img256_ar = np.empty((0, self.imsize[2], self.imsize[2], 3))
+        else:
+            print("+++++++++++++++++++++++++++++++++")
+            print("enddddddddddddddddddd")
+            img256_ar = np.empty((0, 256, 256, 3))
         captions_ar = np.empty((0, cfg.TEXT.WORDS_NUM, 1))
         for _ in range(self.batchsize):
             imgs, captions, cap_lens, class_ids, keys = self.dataset[

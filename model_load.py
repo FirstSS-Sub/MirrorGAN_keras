@@ -20,7 +20,7 @@ from keras.losses import categorical_crossentropy, binary_crossentropy
 from model import *
 
 
-def model_create(dataset):
+def model_create(dataset, branch_num):
     #Function to create model and return
     emb_size, hidden_size  = cfg.TEXT.EMBEDDING_DIM, cfg.TEXT.HIDDEN_DIM // 2
     emb_size_dec, hidden_size_dec = cfg.TEXT.EMBEDDING_DIM_DEC, cfg.TEXT.HIDDEN_DIM_DEC
@@ -35,15 +35,15 @@ def model_create(dataset):
     RNN_model, words_emb, sent_emb, c_code = \
         RNN_ENCODER(emb_size, hidden_size,vocab_size, rec_unit=cfg.RNN_TYPE)
     netGs_out, out_image_block, attm, atts, z_code_input, mask_input = \
-        G_DCGAN(sent_emb, words_emb, c_code)
+        G_DCGAN(sent_emb, words_emb, c_code, branch_num)
 
     cap_input, eps_input = RNN_model.get_input_at(0)
 
-    if cfg.TREE.BRANCH_NUM == 1:
+    if branch_num == 1:
         D_h_logits, D_hc_logits, D_pic_input = D_NET64(sent_emb)
-    if cfg.TREE.BRANCH_NUM == 2:
+    if branch_num == 2:
         D_h_logits, D_hc_logits, D_pic_input = D_NET128(sent_emb)
-    if cfg.TREE.BRANCH_NUM == 3:
+    if branch_num == 3:
         D_h_logits, D_hc_logits, D_pic_input = D_NET256(sent_emb)
     #For learning D
     D_model = Model([D_pic_input, cap_input],
@@ -54,7 +54,7 @@ def model_create(dataset):
         D_model.load_weights(cfg.TRAIN.NET_D)
 
     #G (for D learning output)
-    if cfg.TREE.BRANCH_NUM > 0:
+    if branch_num > 0:
         init_G_model = Model([cap_input, eps_input, z_code_input],
                              netGs_out[0],
                              name="init_G")
@@ -62,7 +62,7 @@ def model_create(dataset):
         if not cfg.TRAIN.INIT_NET_G == "":
             init_G_model.load_weights(cfg.TRAIN.INIT_NET_G, by_name=True)
 
-    if cfg.TREE.BRANCH_NUM > 1:
+    if branch_num > 1:
         next_G_model128 = Model(
             [cap_input, eps_input, z_code_input, mask_input],
             netGs_out[1],
@@ -71,7 +71,7 @@ def model_create(dataset):
         if not cfg.TRAIN.NEXT128_NET_G == "":
             next_G_model128.load_weights(cfg.TRAIN.NEXT128_NET_G, by_name=True)
 
-    if cfg.TREE.BRANCH_NUM > 2:
+    if branch_num > 2:
         next_G_model256 = Model(
             [cap_input, eps_input, z_code_input, mask_input],
             netGs_out[2],
@@ -81,16 +81,16 @@ def model_create(dataset):
             next_G_model256.load_weights(cfg.TRAIN.NEXT256_NET_G, by_name=True)
     #Coupling with output layer and weight load
     out_img = out_image_block(G_output)
-    if cfg.TREE.BRANCH_NUM == 1:
+    if branch_num == 1:
         G_model = Model(init_G_model.get_input_at(0), out_img, name="Generator")
         if not cfg.TRAIN.INIT_NET_G == "":
             G_model.load_weights(cfg.TRAIN.INIT_NET_G)
     else:  #2 or 3
         G_model = Model(
             init_G_model.get_input_at(0) + [mask_input], out_img, name="Generator")
-        if (not cfg.TRAIN.NEXT128_NET_G == "") and (cfg.TREE.BRANCH_NUM == 2):
+        if (not cfg.TRAIN.NEXT128_NET_G == "") and (branch_num == 2):
             G_model.load_weights(cfg.TRAIN.NEXT128_NET_G)
-        if (not cfg.TRAIN.NEXT256_NET_G == "") and (cfg.TREE.BRANCH_NUM == 3):
+        if (not cfg.TRAIN.NEXT256_NET_G == "") and (branch_num == 3):
             G_model.load_weights(cfg.TRAIN.NEXT256_NET_G)
 
     #GRD (For learning G)

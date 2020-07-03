@@ -19,8 +19,7 @@ from PIL import Image
 import numpy.random as random
 import pickle
 
-
-def get_imgs(img_path, imsize, bbox=None, transform=None, normalize=None):
+def get_imgs(img_path, imsize, bbox=None, transform=None, normalize=None, branch_num=0):
     img = Image.open(img_path).convert('RGB')
     width, height = img.size
     if bbox is not None:
@@ -38,12 +37,13 @@ def get_imgs(img_path, imsize, bbox=None, transform=None, normalize=None):
 
     ret = []
 
+
     if cfg.GAN.B_DCGAN:
         ret = [normalize(img)]
     else:
-        for i in range(cfg.TREE.BRANCH_NUM):
+        for i in range(branch_num):
             # print(imsize[i])
-            if i < (cfg.TREE.BRANCH_NUM - 1):
+            if i < (branch_num - 1):
                 re_img = transforms.Resize(imsize[i])(img)
             else:
                 re_img = img
@@ -55,14 +55,15 @@ def get_imgs(img_path, imsize, bbox=None, transform=None, normalize=None):
 
     return ret
 
-
 class TextDataset(data.Dataset):
     def __init__(self,
                  data_dir,
                  split='train',
                  base_size=64,
                  transform=None,
-                 target_transform=None):
+                 target_transform=None,
+                 branch_num=0):
+        self.branch_num = branch_num
         self.transform = transform
         self.norm = transforms.Compose([
             transforms.ToTensor(),
@@ -72,7 +73,7 @@ class TextDataset(data.Dataset):
         self.embeddings_num = cfg.TEXT.CAPTIONS_PER_IMAGE
 
         self.imsize = []
-        for i in range(cfg.TREE.BRANCH_NUM):
+        for i in range(branch_num):
             self.imsize.append(base_size)
             base_size = base_size * 2
 
@@ -275,7 +276,7 @@ class TextDataset(data.Dataset):
         #
         img_name = '%s/images/%s.jpg' % (data_dir, key)
         imgs = get_imgs(
-            img_name, self.imsize, bbox, self.transform, normalize=self.norm)
+            img_name, self.imsize, bbox, self.transform, normalize=self.norm, branch_num=self.branch_num)
         # random select a sentence
         sent_ix = random.randint(0, self.embeddings_num)
         new_sent_ix = index * self.embeddings_num + sent_ix
